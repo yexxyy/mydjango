@@ -325,13 +325,7 @@ class Options:
             else:
                 pk_class = self._get_default_pk_class()
                 auto = pk_class(verbose_name="ID", primary_key=True, auto_created=True)
-                default_primary_key = 'id'
-                try:
-                    # djongo 可以配置成mongo 默认主键 _id
-                    default_primary_key = settings.DEFAULT_AUTO_FIELD_KEY
-                except Exception:
-                    pass
-                model.add_to_class(default_primary_key, auto)
+                model.add_to_class('_id', auto)
 
     def add_manager(self, manager):
         self.local_managers.append(manager)
