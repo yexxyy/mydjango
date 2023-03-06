@@ -272,10 +272,13 @@ class Options:
             )
             raise ImproperlyConfigured(msg) from e
         if not issubclass(pk_class, AutoField):
-            raise ValueError(
-                f"Primary key '{pk_class_path}' referred by {source} must "
-                f"subclass AutoField."
-            )
+            # djongo ObjectIdField 也可以作为主键
+            from djongo.models import ObjectIdField
+            if not issubclass(pk_class, ObjectIdField):
+                raise ValueError(
+                    f"Primary key '{pk_class_path}' referred by {source} must "
+                    f"subclass AutoField."
+                )
         return pk_class
 
     def _prepare(self, model):
@@ -320,7 +323,13 @@ class Options:
             else:
                 pk_class = self._get_default_pk_class()
                 auto = pk_class(verbose_name="ID", primary_key=True, auto_created=True)
-                model.add_to_class("id", auto)
+                default_primary_key = 'id'
+                try:
+                    # djongo 可以配置成mongo 默认主键 _id
+                    default_primary_key = settings.DEFAULT_AUTO_FIELD_KEY
+                except Exception:
+                    pass
+                model.add_to_class(default_primary_key, auto)
 
     def add_manager(self, manager):
         self.local_managers.append(manager)
@@ -520,6 +529,7 @@ class Options:
         combined with filtering of field properties is the public API for
         obtaining this field list.
         """
+
         # For legacy reasons, the fields property should only contain forward
         # fields that are not private or with a m2m cardinality. Therefore we
         # pass these three filters as filters to the generator.
@@ -546,8 +556,8 @@ class Options:
                 f
                 for f in self._get_fields(reverse=False)
                 if is_not_an_m2m_field(f)
-                and is_not_a_generic_relation(f)
-                and is_not_a_generic_foreign_key(f)
+                   and is_not_a_generic_relation(f)
+                   and is_not_a_generic_foreign_key(f)
             ),
         )
 
