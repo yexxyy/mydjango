@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .validators import UnicodeUsernameValidator
+from ...db.models import UniqueConstraint
 
 
 def update_last_login(sender, user, **kwargs):
@@ -71,7 +72,10 @@ class Permission(models.Model):
     class Meta:
         verbose_name = _("permission")
         verbose_name_plural = _("permissions")
-        unique_together = [["content_type", "codename"]]
+        # unique_together = [["content_type", "codename"]]
+        constraints = [
+            UniqueConstraint(fields=["content_type", "codename"], name='permission_cy_cn_uniq')
+        ]
         ordering = ["content_type__app_label", "content_type__model", "codename"]
 
     def __str__(self):

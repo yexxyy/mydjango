@@ -3,6 +3,7 @@ from collections import defaultdict
 from django.apps import apps
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.db.models import UniqueConstraint
 
 
 class ContentTypeManager(models.Manager):
@@ -137,7 +138,10 @@ class ContentType(models.Model):
         verbose_name = _("content type")
         verbose_name_plural = _("content types")
         db_table = "django_content_type"
-        unique_together = [["app_label", "model"]]
+        # unique_together = [["app_label", "model"]]
+        constraints = [
+            UniqueConstraint(fields=["app_label", "model"], name='content_type_al_m_uniq')
+        ]
 
     def __str__(self):
         return self.app_labeled_name
