@@ -248,11 +248,13 @@ class Options:
         return new_objs
 
     def _get_default_pk_class(self):
-        pk_class_path = getattr(
-            self.app_config,
-            "default_auto_field",
-            settings.DEFAULT_AUTO_FIELD,
-        )
+        # pk_class_path = getattr(
+        #     self.app_config,
+        #     "default_auto_field",
+        #     settings.DEFAULT_AUTO_FIELD,
+        # )
+        # 所有的pk字段类型都从配置中获取
+        pk_class_path = settings.DEFAULT_AUTO_FIELD
         if self.app_config and self.app_config._is_default_auto_field_overridden:
             app_config_class = type(self.app_config)
             source = (
